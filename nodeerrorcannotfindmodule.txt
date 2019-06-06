@@ -1,0 +1,64 @@
+Node.js Error: Cannot find module ‘xxx’
+
+此次问题并未在我电脑上出现，我通过修改下面来达到合适的展示效果，适用于windows系统。
+
+在使用node的过程中经常会出现此问题，报错给的很明确，无法找到xxx
+
+现在让我们从头说起
+
+我们使用node require 第三方模块时，他的工作流程是这样的：
+1.先找到当前文件所处目录中的 node_modules 目录
+2.然后根据以下方式找到文件中的 main 属性
+3.main 属性中就记录了 art-template 的入口模块
+4.然后加载使用这个第三方包，但是实际上最终加载的还是文件
+5.如果 package.json 文件不存在或者 main 指定的入口模块是也没有
+6.则 node 会自动找该目录下的 index.js，也就是说 index.js 会作为一个默认备选项
+7.如果以上所有任何一个条件都不成立，则会进入上一级目录中的 node_modules 目录查找
+8.如果上一级还没有，则继续往上上一级查找
+9.如果直到当前磁盘根目录还找不到，最后报错： can not find module xxx
+
+实际上我们在安装node之后，我们可以自己配置环境变量 这样node启动时就会自动从这个地址来寻找第三方模块
+
+如： NODE_PATH ： C:\Users\Administrator\Desktop\nodejs\node_modules
+
+如果第三方模块不存在的话我们可以用下面这句话来解决：
+
+我们通常使用的方式是npm install -g 来安装第三方module
+
+如果上述方法使用过后仍然报同样的错误，我们可以在cmd中使用如下两个命令：
+
+1.先输入node回车，
+>global.module.paths
+
+此处会显示：
+[ 'C:\\Users\\Administrator\\Desktop\\nodejs\\repl\\node_modules',
+  'C:\\Users\\Administrator\\Desktop\\nodejs\\node_modules',
+  'C:\\Users\\Administrator\\Desktop\\node_modules',
+  'C:\\Users\\Administrator\\node_modules',
+  'C:\\Users\\node_modules',
+  'C:\\node_modules',
+  'C:\\Users\\Administrator\\Desktop\\nodejs\\node_modules',
+  'C:\\Users\\Administrator\\.node_modules',
+  'C:\\Users\\Administrator\\.node_libraries',
+  'C:\\Users\\Administrator\\Desktop\\nodejs\\lib\\node' ]
+
+2.重新回到cmd中输入
+npm root -g
+此处会显示：C:\Users\Administrator\Desktop\nodejs\node_global\node_modules
+
+发现npm安装的全局路径并未出现在上方node模块路径中，因此我们修改npm全局安装路径
+
+同样在cmd中 npm config set prefix C:\Users\Administrator\Desktop\nodejs\node_modules
+
+再次使用npm root -g 
+此处显示为： C:\Users\Administrator\Desktop\nodejs\node_modules\node_modules
+
+我们发现他自己会多加一个node_modules 
+
+所以我们再次修改： npm config set prefix C:\Users\Administrator\Desktop\nodejs
+
+再次使用npm root -g 
+此处显示为： C:\Users\Administrator\Desktop\nodejs\node_modules\node_modules
+
+此时再次使用npm install -g 来安装的第三方模块就会安装到C:\Users\Administrator\Desktop\nodejs\node_modules\node_modules 这个路径下 
+在node的全局模块路径中，完成。
